@@ -107,7 +107,7 @@ def create_message(is_good):
 tweeted_at = None
 
 
-@scheduler.scheduled_job("interval", hours=2)
+@scheduler.scheduled_job("interval", seconds=20)
 def checker():
     global tweeted_at
 
