@@ -73,8 +73,6 @@ def get_latest_tweet(base_url):
         "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/section/div/div/div[1]/div/div/article/div/div/div[2]/div[2]/div[2]/div/span",
     )
 
-    driver.close()
-
     # Check if there's a date in the tweet then checks if its today's date
     if (date.today().strftime("%d/%m/%y")) in latest_tweet.text:
         # Check if there's any of the keywords in the tweet
