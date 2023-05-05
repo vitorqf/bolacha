@@ -25,6 +25,7 @@ api = tweepy.Client(
 
 options = Options()
 options.add_argument("--headless")
+options.add_argument("disable-dev-shm-usage")
 # options.add_experimental_option("detach", True)
 
 driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
@@ -70,6 +71,8 @@ def get_latest_tweet(base_url):
         By.XPATH,
         "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/section/div/div/div[1]/div/div/article/div/div/div[2]/div[2]/div[2]/div/span",
     )
+
+    driver.close()
 
     # Check if there's a date in the tweet then checks if its today's date
     if (date.today().strftime("%d/%m/%y")) in latest_tweet.text:
