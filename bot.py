@@ -25,6 +25,7 @@ api = tweepy.Client(
 
 options = Options()
 options.add_argument("--headless")
+options.add_argument("window-size=1920x1480")
 options.add_argument("disable-dev-shm-usage")
 # options.add_experimental_option("detach", True)
 
