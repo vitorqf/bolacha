@@ -6,6 +6,7 @@ import tweepy
 from apscheduler.schedulers.blocking import BlockingScheduler
 from dotenv import load_dotenv
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -31,7 +32,15 @@ options.add_argument("--no-sandbox")
 options.add_argument("disable-dev-shm-usage")
 # options.add_experimental_option("detach", True)
 
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+capabilities = DesiredCapabilities.CHROME.copy()
+capabilities['browserless:token'] = 'b64d611d-e4e2-418d-8157-43d91809ca13'
+
+
+driver = webdriver.Remote(
+    command_executor='https://chrome.browserless.io/webdriver',
+    options=options,
+    desired_capabilities=capabilities
+)
 
 base_url = "https://twitter.com/merendaifrnpdf"
 
