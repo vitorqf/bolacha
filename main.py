@@ -9,6 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
@@ -26,10 +27,11 @@ api = tweepy.Client(
 options = Options()
 options.add_argument("--headless")
 options.add_argument("window-size=1920x1480")
+options.add_argument("--no-sandbox")
 options.add_argument("disable-dev-shm-usage")
 # options.add_experimental_option("detach", True)
 
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 base_url = "https://twitter.com/merendaifrnpdf"
 
