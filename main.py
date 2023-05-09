@@ -75,6 +75,8 @@ scheduler = BlockingScheduler()
 
 
 def get_latest_tweet(base_url):
+    print("Acessando o Twitter...")
+
     driver.get(base_url)
 
     driver.implicitly_wait(5)
@@ -99,6 +101,7 @@ def get_latest_tweet(base_url):
 
 
 def new_tweet(message):
+    print("Tentativa de postar o tweet iniciada ...")
     api.create_tweet(text=message)
 
 
@@ -130,6 +133,10 @@ def checker():
     else:
         try:
             if get_latest_tweet(base_url):
+                print(
+                    "Postando tweet com a data de hoje e as palavras-chave (mensagem ruim)..."
+                )
+
                 # Case there's a tweet with the date and the keywords, it means there's no cookies, then create a bad message
                 message = create_message(is_good=False)
                 new_tweet(message)
@@ -137,6 +144,10 @@ def checker():
                 tweeted_at = date.today().strftime("%d/%m/%y")
 
             elif get_latest_tweet(base_url) is False:
+                print(
+                    "Postando tweet com a data de hoje e as palavras-chave (mensagem boa)..."
+                )
+
                 message = create_message(is_good=True)
                 new_tweet(message)
                 print(f"{date.today().strftime('%d/%m/%y')} - {message}")
@@ -150,3 +161,5 @@ def checker():
 
 
 scheduler.start()
+
+print("Executando...")
