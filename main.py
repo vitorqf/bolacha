@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import random
 from datetime import date, datetime
@@ -26,6 +27,37 @@ api = tweepy.Client(
     bearer_token=f"{os.getenv('bearer_token')}",
 )
 
+config = {
+    "base_url": "https://twitter.com/merendaifrnpdf",
+    "browserless_token": "b64d611d-e4e2-418d-8157-43d91809ca13",
+    "browserless_endpoint": "https://chrome.browserless.io/webdriver",
+    "keywords": ["bolacha", "Bolacha", "BOLACHA", "Biscoito", "biscoito", "BISCOITO"],
+    "bad_word": [
+        "Puxa vida",
+        "Carambolas",
+        "Caraca",
+        "Cacetada",
+        "Diacho",
+        "Droga",
+        "Argh",
+        "Ah não omi",
+        "Maizome",
+    ],
+    "good_word": [
+        "Parabéns",
+        "Viva",
+        "Bravo",
+        "Aleluia",
+        "Uhu",
+        "Eba",
+        "Aplausos",
+        "Que legal",
+        "Excelente",
+        "Sensacional",
+        "Bom demaize",
+    ],
+}
+
 options = Options()
 options.add_argument("--headless")
 options.add_argument("window-size=1920x1480")
@@ -34,48 +66,19 @@ options.add_argument("disable-dev-shm-usage")
 # options.add_experimental_option("detach", True)
 
 capabilities = DesiredCapabilities.CHROME.copy()
-capabilities["browserless:token"] = "b64d611d-e4e2-418d-8157-43d91809ca13"
-
+capabilities["browserless:token"] = config["browserless_token"]
 
 driver = webdriver.Remote(
-    command_executor="https://chrome.browserless.io/webdriver",
+    command_executor=config["browserless_endpoint"],
     options=options,
     desired_capabilities=capabilities,
 )
-
-base_url = "https://twitter.com/merendaifrnpdf"
-
-keywords = ["bolacha", "Bolacha", "BOLACHA", "Biscoito", "biscoito", "BISCOITO"]
-bad_word = [
-    "Puxa vida",
-    "Carambolas",
-    "Caraca",
-    "Cacetada",
-    "Diacho",
-    "Droga",
-    "Argh",
-    "Ah não omi",
-    "Maizome",
-]
-good_word = [
-    "Parabéns",
-    "Viva",
-    "Bravo",
-    "Aleluia",
-    "Uhu",
-    "Eba",
-    "Aplausos",
-    "Que legal",
-    "Excelente",
-    "Sensacional",
-    "Bom demaize",
-]
 
 scheduler = BlockingScheduler()
 
 
 def get_latest_tweet(base_url):
-    print("Acessando o Twitter...")
+    print("[ - ] Acessando o Twitter...")
 
     driver.get(base_url)
 
@@ -90,7 +93,7 @@ def get_latest_tweet(base_url):
     # Check if there's a date in the tweet then checks if its today's date
     if (date.today().strftime("%d/%m/%y")) in latest_tweet.text:
         # Check if there's any of the keywords in the tweet
-        if any(keyword in latest_tweet.text for keyword in keywords):
+        if any(keyword in latest_tweet.text for keyword in config["keywords"]):
             return True
 
         else:
@@ -101,65 +104,66 @@ def get_latest_tweet(base_url):
 
 
 def new_tweet(message):
-    print("Tentativa de postar o tweet iniciada ...")
+    print("[ - ] Criando novo tweet...")
     api.create_tweet(text=message)
+    write_last_tweet_date()
+    print("[ + ] Tweet criado com sucesso!")
 
 
 def create_message(is_good):
     message = ""
 
     if is_good:
-        word = random.choice(good_word)
+        word = random.choice(config["good_word"])
         message = f"{word}!\nHoje NÃO tem bolacha! 😃\n\n🍪🍪🍪"
 
     else:
-        word = random.choice(bad_word)
+        word = random.choice(config["bad_word"])
         message = f"{word}!\nHoje tem bolacha. 😔\n\n🍪🍪🍪"
 
     return message
 
 
-tweeted_at = None
+def check_last_tweet_date():
+    with open("last_tweet_date.json", "r") as file:
+        last_tweet_date = json.load(file).get("last_tweet_date")
+
+    if last_tweet_date == date.today().strftime("%d/%m/%y"):
+        return True
 
 
-@scheduler.scheduled_job("interval", hours=1)
+def write_last_tweet_date():
+    last_tweet_date = date.today().strftime("%d/%m/%y")
+
+    with open("last_tweet_date.json", "w") as file:
+        json.dump({"last_tweet_date": last_tweet_date}, file)
+
+
+@scheduler.scheduled_job("interval", seconds=20)
 def checker():
-    global tweeted_at
-
     # Check if the tweet was already posted today
-    if tweeted_at == date.today().strftime("%d/%m/%y"):
-        print(f"{datetime.now()} - Tweet já postado hoje!")
+    if check_last_tweet_date():
+        print(f"[ ! ] Tweet já postado hoje!")
 
     else:
         try:
-            if get_latest_tweet(base_url):
-                print(
-                    "Postando tweet com a data de hoje e as palavras-chave (mensagem ruim)..."
-                )
+            result = get_latest_tweet(config["base_url"])
 
-                # Case there's a tweet with the date and the keywords, it means there's no cookies, then create a bad message
+            if result:
                 message = create_message(is_good=False)
                 new_tweet(message)
-                print(f"{date.today().strftime('%d/%m/%y')} - {message}")
-                tweeted_at = date.today().strftime("%d/%m/%y")
 
-            elif get_latest_tweet(base_url) is False:
-                print(
-                    "Postando tweet com a data de hoje e as palavras-chave (mensagem boa)..."
-                )
-
+            elif result is False:
                 message = create_message(is_good=True)
                 new_tweet(message)
-                print(f"{date.today().strftime('%d/%m/%y')} - {message}")
-                tweeted_at = date.today().strftime("%d/%m/%y")
 
-            elif get_latest_tweet(base_url) is None:
-                print("Data não encontrada")
+            elif result is None:
+                print("[ ! ] Data não encontrada")
 
         except Exception as e:
             print(e)
 
 
+os.system("clear")
+print("[ * ] Executando...")
 scheduler.start()
-
-print("Executando....")
