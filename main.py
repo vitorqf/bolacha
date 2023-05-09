@@ -1,19 +1,15 @@
-import datetime
 import json
 import os
 import random
-from datetime import date, datetime
+from datetime import date
 
 import tweepy
 from apscheduler.schedulers.blocking import BlockingScheduler
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
 
@@ -29,7 +25,7 @@ api = tweepy.Client(
 
 config = {
     "base_url": "https://twitter.com/merendaifrnpdf",
-    "browserless_token": "b64d611d-e4e2-418d-8157-43d91809ca13",
+    "browserless_token": f"{os.getenv('browserless_token')}",
     "browserless_endpoint": "https://chrome.browserless.io/webdriver",
     "keywords": ["bolacha", "Bolacha", "BOLACHA", "Biscoito", "biscoito", "BISCOITO"],
     "bad_word": [
@@ -139,7 +135,7 @@ def write_last_tweet_date():
         json.dump({"last_tweet_date": last_tweet_date}, file)
 
 
-@scheduler.scheduled_job("interval", seconds=20)
+@scheduler.scheduled_job("interval", hours=1)
 def checker():
     # Check if the tweet was already posted today
     if check_last_tweet_date():
