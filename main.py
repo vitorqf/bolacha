@@ -1,16 +1,17 @@
+import datetime
 import os
 import random
-from datetime import date
+from datetime import date, datetime
 
 import tweepy
 from apscheduler.schedulers.blocking import BlockingScheduler
 from dotenv import load_dotenv
 from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
@@ -33,13 +34,13 @@ options.add_argument("disable-dev-shm-usage")
 # options.add_experimental_option("detach", True)
 
 capabilities = DesiredCapabilities.CHROME.copy()
-capabilities['browserless:token'] = 'b64d611d-e4e2-418d-8157-43d91809ca13'
+capabilities["browserless:token"] = "b64d611d-e4e2-418d-8157-43d91809ca13"
 
 
 driver = webdriver.Remote(
-    command_executor='https://chrome.browserless.io/webdriver',
+    command_executor="https://chrome.browserless.io/webdriver",
     options=options,
-    desired_capabilities=capabilities
+    desired_capabilities=capabilities,
 )
 
 base_url = "https://twitter.com/merendaifrnpdf"
@@ -88,13 +89,13 @@ def get_latest_tweet(base_url):
     if (date.today().strftime("%d/%m/%y")) in latest_tweet.text:
         # Check if there's any of the keywords in the tweet
         if any(keyword in latest_tweet.text for keyword in keywords):
-            return "Bolacha"
+            return True
 
         else:
-            return "Não tem bolacha"
+            return False
 
     else:
-        return "Data não encontrada"
+        return None
 
 
 def new_tweet(message):
@@ -118,29 +119,30 @@ def create_message(is_good):
 tweeted_at = None
 
 
-@scheduler.scheduled_job("interval", minutes=10)
+@scheduler.scheduled_job("interval", hours=1)
 def checker():
     global tweeted_at
 
     # Check if the tweet was already posted today
     if tweeted_at == date.today().strftime("%d/%m/%y"):
-        print("Tweet já postado hoje!")
+        print(f"{datetime.now()} - Tweet já postado hoje!")
 
     else:
         try:
-            if get_latest_tweet(base_url) == "Bolacha":
+            if get_latest_tweet(base_url):
+                # Case there's a tweet with the date and the keywords, it means there's no cookies, then create a bad message
                 message = create_message(is_good=False)
                 new_tweet(message)
                 print(f"{date.today().strftime('%d/%m/%y')} - {message}")
                 tweeted_at = date.today().strftime("%d/%m/%y")
 
-            elif get_latest_tweet(base_url) == "Não tem bolacha":
+            elif get_latest_tweet(base_url) is False:
                 message = create_message(is_good=True)
                 new_tweet(message)
                 print(f"{date.today().strftime('%d/%m/%y')} - {message}")
                 tweeted_at = date.today().strftime("%d/%m/%y")
 
-            else:
+            elif get_latest_tweet(base_url) is None:
                 print("Data não encontrada")
 
         except Exception as e:
