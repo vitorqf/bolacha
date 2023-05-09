@@ -162,4 +162,4 @@ def checker():
 
 scheduler.start()
 
-print("Executando...")
+print("Executando....")
