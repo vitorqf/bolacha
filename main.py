@@ -135,7 +135,7 @@ def write_last_tweet_date():
         json.dump({"last_tweet_date": last_tweet_date}, file)
 
 
-@scheduler.scheduled_job("interval", minutes=10)
+@scheduler.scheduled_job("interval", seconds=20)
 def checker():
     # Check if the tweet was already posted today
     if check_last_tweet_date():
