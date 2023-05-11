@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from datetime import date
+from datetime import date, datetime
 
 import pywhatkit
 import tweepy
@@ -31,8 +31,6 @@ api = tweepy.Client(
 # Constant variables
 config = {
     "base_url": "https://twitter.com/merendaifrnpdf",
-    "browserless_token": f"{os.getenv('browserless_token')}",
-    "browserless_endpoint": "https://chrome.browserless.io/webdriver",
     "keywords": ["bolacha", "Bolacha", "BOLACHA", "Biscoito", "biscoito", "BISCOITO"],
 }
 
@@ -51,8 +49,10 @@ options.add_argument("disable-dev-shm-usage")
 # Selenium driver
 driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
+f = open("log.txt", "w")
+
 def get_latest_tweet(base_url):
-    print("[ - ] Acessando o Twitter...")
+    f.write(f"{datetime.now()} [ - ] Acessando o Twitter...\n")
 
     # Access the Twitter page
     driver.get(base_url)
@@ -92,7 +92,7 @@ def get_latest_tweet(base_url):
         return None
 
 def new_tweet(message):
-    print("[ - ] Criando novo tweet...")
+    f.write(f"{datetime.now()} [ - ] Criando novo tweet...\n")
 
     # Create the tweet
     api.create_tweet(text=message)
@@ -100,10 +100,10 @@ def new_tweet(message):
     # Saves the last tweet date
     write_last_tweet_date()
 
-    print("[ + ] Tweet criado com sucesso!")
+    f.write(f"{datetime.now()} [ + ] Tweet criado com sucesso!\n")
 
 def new_whatsapp_message(message):
-    print("[ - ] Criando nova mensagem no WhatsApp...")
+    f.write(f"{datetime.now()} [ - ] Criando nova mensagem no WhatsApp...\n")
 
     # Send the tweet + custom message on WhatsApp
     pywhatkit.sendwhatmsg_instantly(
@@ -114,7 +114,7 @@ def new_whatsapp_message(message):
         close_time=10,
     )
 
-    print("[ + ] Mensagem enviada com sucesso!")
+    f.write(f"{datetime.now()} [ + ] Mensagem enviada com sucesso!\n")
 
 def create_message(url, is_good):
     message = ""
@@ -151,11 +151,11 @@ def write_last_tweet_date():
         json.dump({"last_tweet_date": last_tweet_date}, file)
 
 # Scheduler to run the script every 30 minutes
-@scheduler.scheduled_job("interval", minutes=30)
+@scheduler.scheduled_job("interval", seconds=20)
 def checker():
     # Check if the tweet was already posted today
     if check_last_tweet_date():
-        print(f"[ ! ] Tweet já postado hoje!")
+        f.write(f"{datetime.now()} [ ! ] Tweet já postado hoje!\n")
 
     else:
         try:
@@ -181,12 +181,14 @@ def checker():
                 new_whatsapp_message(wpp_message)
 
             elif result is None:
-                print("[ ! ] Data não encontrada")
+                f.write(f"{datetime.now()} [ ! ] Data não encontrada\n")
 
         except Exception as e:
-            print(e)
+            f.write(f"{datetime.now()} [ ! ] Erro: {e}")
 
+    f.flush()
+    os.fsync(f.fileno())
 
-os.system("clear")
-print("[ * ] Executando...")
+f.write(f"{datetime.now()} [ * ] Executando...\n")
 scheduler.start()
+f.close()
