@@ -10,6 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
 
@@ -64,11 +65,7 @@ options.add_argument("disable-dev-shm-usage")
 capabilities = DesiredCapabilities.CHROME.copy()
 capabilities["browserless:token"] = config["browserless_token"]
 
-driver = webdriver.Remote(
-    command_executor=config["browserless_endpoint"],
-    options=options,
-    desired_capabilities=capabilities,
-)
+driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
 scheduler = BlockingScheduler()
 
