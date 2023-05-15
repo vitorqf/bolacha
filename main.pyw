@@ -151,7 +151,7 @@ def write_last_tweet_date():
         json.dump({"last_tweet_date": last_tweet_date}, file)
 
 # Scheduler to run the script every 30 minutes
-@scheduler.scheduled_job("interval", seconds=20)
+@scheduler.scheduled_job("interval", minutes=1)
 def checker():
     # Check if the tweet was already posted today
     if check_last_tweet_date():
