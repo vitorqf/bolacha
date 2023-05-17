@@ -44,6 +44,7 @@ options.add_argument("--headless")
 options.add_argument("window-size=1920x1480")
 options.add_argument("--no-sandbox")
 options.add_argument("disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
 # options.add_experimental_option("detach", True)
 
 # Selenium driver
@@ -53,6 +54,7 @@ f = open("log.txt", "w")
 
 def get_latest_tweet(base_url):
     f.write(f"{datetime.now()} [ - ] Acessando o Twitter...\n")
+    print(f"{datetime.now()} [ - ] Acessando o Twitter...\n")
 
     # Access the Twitter page
     driver.get(base_url)
@@ -63,8 +65,11 @@ def get_latest_tweet(base_url):
     # Get the latest tweet
     latest_tweet = driver.find_element(
         By.XPATH,
-        "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/section/div/div/div[1]/div/div/article/div/div/div[2]/div[2]/div[2]/div/span",
+        "/html/body/div[1]/div/div/div[2]/main/div/div/div/div/div/div[3]/div/div/section/div/div/div[1]/div/div/article/div/div/div[2]/div[2]/div[2]/div/span",
     )
+
+    print(f"{datetime.now()} [ + ] Tweet encontrado! Entrando para buscar o texto.\n")
+    f.write(f"{datetime.now()} [ + ] Tweet encontrado! Entrando para buscar o texto.\n")
 
     # Enter the latest tweet
     latest_tweet.click()
@@ -75,8 +80,11 @@ def get_latest_tweet(base_url):
     # Get the tweet text
     tweet_text = driver.find_element(
         By.XPATH,
-        "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/section/div/div/div[1]/div/div/article/div/div/div[3]/div[2]/div/div[1]/span[1]",
+        "/html/body/div[1]/div/div/div[2]/main/div/div/div/div/div/section/div/div/div[1]/div/div/article/div/div/div[3]/div[1]/div/div/span",
     ).text
+
+    print(f"{datetime.now()} [ + ] Texto do tweet encontrado! Fechando o navegador.\n")
+    f.write(f"{datetime.now()} [ + ] Texto do tweet encontrado! Fechando o navegador.\n")
 
     # We check if the tweet is from today, if not we return None
     if (date.today().strftime("%d/%m/%y")) in tweet_text:
@@ -93,6 +101,7 @@ def get_latest_tweet(base_url):
 
 def new_tweet(message):
     f.write(f"{datetime.now()} [ - ] Criando novo tweet...\n")
+    print(f"{datetime.now()} [ - ] Criando novo tweet...\n")
 
     # Create the tweet
     api.create_tweet(text=message)
@@ -101,9 +110,11 @@ def new_tweet(message):
     write_last_tweet_date()
 
     f.write(f"{datetime.now()} [ + ] Tweet criado com sucesso!\n")
+    print(f"{datetime.now()} [ + ] Tweet criado com sucesso!\n")
 
 def new_whatsapp_message(message):
     f.write(f"{datetime.now()} [ - ] Criando nova mensagem no WhatsApp...\n")
+    print(f"{datetime.now()} [ - ] Criando nova mensagem no WhatsApp...\n")
 
     # Send the tweet + custom message on WhatsApp
     pywhatkit.sendwhatmsg_instantly(
@@ -115,6 +126,7 @@ def new_whatsapp_message(message):
     )
 
     f.write(f"{datetime.now()} [ + ] Mensagem enviada com sucesso!\n")
+    print(f"{datetime.now()} [ + ] Mensagem enviada com sucesso!\n")
 
 def create_message(url, is_good):
     message = ""
@@ -156,6 +168,7 @@ def checker():
     # Check if the tweet was already posted today
     if check_last_tweet_date():
         f.write(f"{datetime.now()} [ ! ] Tweet já postado hoje!\n")
+        print(f"{datetime.now()} [ ! ] Tweet já postado hoje!\n")
 
     else:
         try:
@@ -181,14 +194,17 @@ def checker():
                 new_whatsapp_message(wpp_message)
 
             elif result is None:
+                print(f"{datetime.now()} [ ! ] Data não encontrada\n")
                 f.write(f"{datetime.now()} [ ! ] Data não encontrada\n")
 
         except Exception as e:
+            print(f"{datetime.now()} [ ! ] Erro: {e}")
             f.write(f"{datetime.now()} [ ! ] Erro: {e}")
 
     f.flush()
     os.fsync(f.fileno())
 
 f.write(f"{datetime.now()} [ * ] Executando...\n")
+print(f"{datetime.now()} [ * ] Executando...\n")
 scheduler.start()
 f.close()
