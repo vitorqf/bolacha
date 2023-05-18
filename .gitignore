@@ -3,3 +3,5 @@
 /.vscode
 log.txt
 PyWhatKit_DB.txt
+/dist/*
+/build/*
