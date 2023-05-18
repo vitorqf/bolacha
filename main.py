@@ -286,7 +286,7 @@ def write_last_tweet_date():
 
 
 # Scheduler to run the script every 30 minutes
-@scheduler.scheduled_job("interval", minutes=2)
+@scheduler.scheduled_job("interval", minutes=20)
 def checker():
     f.write(f"{datetime.now().strftime('[%H:%M:%S]')} - Iniciando o script...\n")
     print(f"{datetime.now().strftime('[%H:%M:%S]')} - Iniciando o script...")
@@ -327,13 +327,13 @@ def checker():
                     f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar a mensagem para o Twitter e WhatsApp..."
                 )
 
-                # new_tweet(message)
-                # f.write(
-                #     f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar o tweet...\n"
-                # )
-                # print(
-                #     f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar o tweet..."
-                # )
+                new_tweet(message)
+                f.write(
+                    f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar o tweet...\n"
+                )
+                print(
+                    f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar o tweet..."
+                )
 
                 new_whatsapp_message(wpp_message)
                 f.write(
@@ -361,13 +361,13 @@ def checker():
                     f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar a mensagem para o Twitter e WhatsApp..."
                 )
 
-                # new_tweet(message)
-                # f.write(
-                #     f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar o tweet...\n"
-                # )
-                # print(
-                #     f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar o tweet..."
-                # )
+                new_tweet(message)
+                f.write(
+                    f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar o tweet...\n"
+                )
+                print(
+                    f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui criar o tweet..."
+                )
 
                 new_whatsapp_message(wpp_message)
                 f.write(
@@ -397,6 +397,9 @@ def checker():
 
 f.write(f"{datetime.now().strftime('[%H:%M:%S]')} - Executando...\n")
 print(f"{datetime.now().strftime('[%H:%M:%S]')} - Executando...")
+
+f.flush()
+os.fsync(f.fileno())
 
 scheduler.start()
 f.close()
