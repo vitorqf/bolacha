@@ -98,12 +98,12 @@ f = open("log.txt", "w")
 
 
 def shutdown_PC():
-    os.system("shutdown /s /t 30")
+    os.system("shutdown /s /t 60")
     f.write(
-        f"{datetime.now().strftime('[%H:%M:%S]')} - Desligando o PC em 10 segundos...\n"
+        f"{datetime.now().strftime('[%H:%M:%S]')} - Desligando o PC em 1 minuto...\n"
     )
     print(
-        f"{datetime.now().strftime('[%H:%M:%S]')} - Desligando o PC em 10 segundos..."
+        f"{datetime.now().strftime('[%H:%M:%S]')} - Desligando o PC em 1 minuto..."
     )
 
 
@@ -115,7 +115,7 @@ def get_latest_tweet(base_url):
     driver.get(base_url)
 
     # Wait for the page to load
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(10)
 
     try:
         notification_button = driver.find_element(
@@ -131,11 +131,11 @@ def get_latest_tweet(base_url):
                 f"{datetime.now().strftime('[%H:%M:%S]')} - Fechei o pop-up de notificação..."
             )
             notification_button.click()
+            driver.implicitly_wait(10)
 
     except:
         pass
 
-    driver.implicitly_wait(5)
 
     # Get the latest tweet
     latest_tweet = driver.find_element(
@@ -153,7 +153,7 @@ def get_latest_tweet(base_url):
         latest_tweet.click()
 
         # Wait for the page to load
-        driver.implicitly_wait(5)
+        driver.implicitly_wait(10)
 
         f.write(
             f"{datetime.now().strftime('[%H:%M:%S]')} - Acabei de entrar no último Tweet...\n"
@@ -177,25 +177,26 @@ def get_latest_tweet(base_url):
                 f"{datetime.now().strftime('[%H:%M:%S]')} - Consegui encontrar o texto do Tweet acessado..."
             )
 
-            # Check if the tweet contains any of the keywords
-            for keyword in config["keywords"]:
-                if keyword in tweet_text:
-                    f.write(
-                        f"{datetime.now().strftime('[%H:%M:%S]')} - Encontrei a Palavra-chave...\n"
-                    )
-                    print(
-                        f"{datetime.now().strftime('[%H:%M:%S]')} - Encontrei a Palavra-chave..."
-                    )
-                    return True
+            print(tweet_text)
 
-                else:
-                    f.write(
-                        f"{datetime.now().strftime('[%H:%M:%S]')} - Não encontrei a Palavra-chave...\n"
-                    )
-                    print(
-                        f"{datetime.now().strftime('[%H:%M:%S]')} - Não encontrei a Palavra-chave..."
-                    )
-                    return False
+            # Check if the tweet contains any of the keywords
+            if any(keyword in tweet_text for keyword in config["keywords"]):
+                f.write(
+                    f"{datetime.now().strftime('[%H:%M:%S]')} - Encontrei a Palavra-chave...\n"
+                )
+                print(
+                    f"{datetime.now().strftime('[%H:%M:%S]')} - Encontrei a Palavra-chave..."
+                )
+                return True
+
+            else:
+                f.write(
+                    f"{datetime.now().strftime('[%H:%M:%S]')} - Não encontrei a Palavra-chave...\n"
+                )
+                print(
+                    f"{datetime.now().strftime('[%H:%M:%S]')} - Não encontrei a Palavra-chave..."
+                )
+                return False
 
         else:
             f.write(
@@ -286,7 +287,7 @@ def write_last_tweet_date():
 
 
 # Scheduler to run the script every 30 minutes
-@scheduler.scheduled_job("interval", minutes=20)
+@scheduler.scheduled_job("interval", minutes=1)
 def checker():
     f.write(f"{datetime.now().strftime('[%H:%M:%S]')} - Iniciando o script...\n")
     print(f"{datetime.now().strftime('[%H:%M:%S]')} - Iniciando o script...")
